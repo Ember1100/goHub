@@ -1,0 +1,1 @@
+go mod init go-gin-example

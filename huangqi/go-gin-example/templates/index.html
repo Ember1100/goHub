@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>文件上传示例</title>
+</head>
+<body>
+  <h1>文件上传示例</h1>
+  <input type="file" id="fileInput">
+  <button onclick="handleFileSelection()">上传文件</button>
+ 
+</body>
+</html>
+<script>
+
+function handleFileSelection() {
+  var fileInput = document.getElementById('fileInput');
+  var file = fileInput.files[0];
+  console.log(123)
+  console.log(file.name)
+  uploadFile(file);
+}    
+function uploadFile(file) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/generatePresignedURL?objectKey='+file.name, true);
+    xhr.onload = function() {
+    if (xhr.status === 200) {
+    var responseObj = JSON.parse(xhr.response);
+    var responseData = responseObj.data;
+    console.log(responseObj);
+    console.log(responseData);
+    uploadToMinIO(file, responseData);
+    } else {
+      console.error('无法获取临时签名 URL');
+    }
+  };
+
+  xhr.send();
+}
+
+function uploadToMinIO(file, presignedURL) {
+  fetch(presignedURL, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: file,
+  })
+    .then(response => {
+        console.log(file)
+      if (response.ok) {
+        console.log('文件上传成功');
+      } else {
+        console.error('文件上传失败');
+      }
+    })
+    .catch(error => {
+      console.error('文件上传失败:', error);
+    });
+}
+</script>
