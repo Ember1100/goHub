@@ -14,7 +14,7 @@ import (
 )
 
 func PingHandler(c *gin.Context) {
-	arr, err := core.FindData()
+	arr, err := core.FindData(c)
 	if err != nil {
 		fmt.Print(err)
 	}

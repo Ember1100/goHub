@@ -1,18 +1,27 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"go-gin-example/conf"
 	"go-gin-example/models"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func FindData() ([]models.SysUploadTask, error) {
-	db, err := conf.ConnectToDatabase()
-	if err != nil {
-		return nil, err
+func FindData(c *gin.Context) ([]models.SysUploadTask, error) {
+	db, ok := c.Get("db")
+	if !ok {
+		return nil, errors.New("database connection not found in context")
 	}
+	gormDB, ok := db.(*gorm.DB)
+	if !ok {
+		return nil, errors.New("invalid database connection type")
+	}
+
 	var tasks []models.SysUploadTask
-	result := db.Find(&tasks)
+	result := gormDB.Find(&tasks)
 	if result.Error != nil {
 		return nil, result.Error
 	}
